@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model NewsItem {
+  id           String   @id @default(cuid())
+  title        String
+  content      String?
+  url          String   @unique
+  source       String
+  publishedAt  DateTime
+  category     String?
+  tags         String   // JSON string array
+  relatedPeople String  // JSON string array
+  chain        String?
+  project      String?
+  sentiment    String?  // positive, negative, neutral
+  importance   Int      @default(5)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("news_items")
+}
+
+model Celebrity {
+  id             String   @id @default(cuid())
+  name           String
+  username       String   @unique
+  bio            String
+  avatar         String?
+  role           String
+  company        String?
+  followers      Int?
+  verified       Boolean  @default(false)
+  twitterHandle  String?
+  latestUpdate   DateTime?
+  relatedProjects String  // JSON string array
+  expertise      String   // JSON string array
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  updates CelebrityUpdate[]
+
+  @@map("celebrities")
+}
+
+model CelebrityUpdate {
+  id           String   @id @default(cuid())
+  celebrityId  String
+  content      String
+  url          String
+  publishedAt  DateTime
+  platform     String
+  likes        Int?
+  retweets     Int?
+  replies      Int?
+  tags         String   // JSON string array
+  relatedProjects String // JSON string array
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  celebrity Celebrity @relation(fields: [celebrityId], references: [id], onDelete: Cascade)
+
+  @@map("celebrity_updates")
+}
+
+model MarketData {
+  id            String   @id @default(cuid())
+  symbol        String   @unique
+  name          String
+  currentPrice  Float
+  priceChange24h Float
+  priceChange7d Float
+  marketCap     Float
+  volume24h     Float
+  rank          Int
+  sparklineData String   // JSON number array
+  lastUpdated   DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("market_data")
+}
+
+model TrendingTopic {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  category        String
+  mentionCount    Int
+  sentimentScore  Float
+  relatedProjects String   // JSON string array
+  relatedPeople   String   // JSON string array
+  timeline        String   // JSON array of {date, count}
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("trending_topics")
+}
